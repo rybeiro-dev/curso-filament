@@ -53,7 +53,7 @@ declare(strict_types=1);
 
 ### Configuração do Banco de dados
 
-O _Filament utiliza a tabela _User_
+O _Filament_ utiliza a tabela _User_
 
 Ajuste na _migration User_
 
@@ -125,11 +125,17 @@ class User extends Authenticatable implements FilamentUser, HasName
 ## Estrutura de diretótios do Filament
 
 App/Filament/Resources
+
 +-- CustomerResource.php
+
 +-- CustomerResource
+
 |   +-- Pages
+
 |   |   +-- CreateCustomer.php
+
 |   |   +-- EditCustomer.php
+
 |   |   +-- ListCustomer.php
 
 
@@ -146,9 +152,13 @@ vendor/bin/sail artisan make:filament-resource User --generate --simple
 Entendo o que foi gerado:
 
 App/Filament/Resources
+
 +-- UserResource.php # O principal onde todas as alterações são efetuadas.
+
 +-- UserResource
+
 |   +-- Pages
+
 |   |   +-- ManagerUsers.php # só gerou esse porque é Modal
 
 O método form() é construir os formulários atráves de classes e métodos PHP
