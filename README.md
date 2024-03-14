@@ -309,5 +309,235 @@ Para corrigir problemas de exibição de tags html
 ```shell
 ```
 
+# CRUD de Task
+
+Gerar o crud organizado por pasta
+
+```shell
+# -m ( migration ) -f ( factory )
+php artisan make:model Admin/Task -mf
+```
+
+Editar a migration task e incluir
+
+```php
+$table->foreignId('user_id')->index()->cascadeOnUpload()->cascadeOnDelete();
+$table->foreignId('task_group_id')->index()->cascadeOnUpdate()->cascadeOnDelete();
+$table->string('title');
+$table->text('desctiption')->nullable();
+```
+
+Editar a factory
+
+```php
+# TaskFactory.php
+
+return = [
+	'user_id' => User::all()->random()->id,
+	'task_group_id' => TaskGroup::all()->random()->id,
+	'title' => fake()->sentence(3),
+	'description' => fake()->text()
+];
+
+```
+
+Adicionar Seeds
+
+```php
+# DatabaseSeeder.php
+# adicionar
+Task::factory(200)->create();
+````
+
+Executar a migration
+```shell
+# --seed ( para popular a tabela )
+php artisan migrate:fresh --seed
+```
+
+#### Gerar o Filament do crud Task
+```shell
+php artisan make:filament-resource Admin/Task --generate
+```
+
+Importante fazer os relacionamentos de Task com User e TaskGroup.
+
+### Personalizando a Task
+
+EConfigurações paa exibir o relacionamento
+```php
+# App\Filament\Admin\TaskResource.php
+# Na função table()
+# alterar de
+Table\Columns\TextColumn::make('user_id');
+
+# para
+Table\Columns\TextColumn::make('user.name');
+
+
+# alterar de
+Table\Columns\TextColumn::make('task_group_id');
+
+# para
+Table\Columns\TextColumn::make('taskGroup.title');
+```
+
+Ordenação e Busca no relacionamento
+```php
+Table\Columns\TextColumn::make('user.name')->sortable()->searchable();
+Table\Columns\TextColumn::make('taskGroup.title')->sortable()->searchable();
+```
+
+#### Adicionando filtros no crud Task
+
+Criando filtros
+
+```php
+# table()
+->filters([
+  # filtro seleção simples
+  Tables\Filters\SelectFilter::make('user.name')->relationship('user', 'name')->searchable()->label('Usuário'),
+  # filtro de seleção multipla
+  Tables\Filters\SelectFilter::make('taskGroup.title')->relationship('taskGroup', 'title')->searchable()->label('Grupo de tarefas')->multiple(),
+])
+
+```
+
+#### Criando BadgeColumns
+
+```php
+# table()
+Tables\Columns\BadgeColumn::make('taskGroup.title')
+  ->colors([
+    'secondary',
+    'primary' => 'Backlog',
+    'warning' => 'In Progress',
+    'success' => 'Done',
+    'danger' => 'To Do'
+  ])
+```
+
+#### Adicionando relacionamento no Edit e campo select
+
+```php
+# form()
+Forms\Components\Select::make('user_id')->relationship('user', 'name')->searchable()->required(),
+Forms\Components\Select::make('task_group_id')->relationship('taskGroup', 'title')->required(),
+```
+
+# Personalizando o Tema
+
+As configurações de personalização do Filament podem ser encontrados em config/filament.php
+
+#### Habilitando a opção dark mode
+
+```php
+'dark_mode' => true,
+```
+
+#### Alterando a logo 
+
+criar o seguinte arquivo e a árvore de diretórios em view:
+
+vendor/filament/components/brand.blade.php
+
+```php
+# brand.blade.php
+<div class="flex justify-start">
+  <div>
+    <img src="https://placehold.co/40x40/png" alt"Logo">
+  </div>
+  <div class="pt-1 pl-2 text2xl font-bold tracking-tight filament-brand dark:text-white">
+    {{ config('app.name') }}
+  </div>
+</div>
+
+```
+
+
+
+
+### Instalar as dependências Tailwindcss
+```shell
+npm install tailwindcss @tailwindcss/forms @tailwindcss/typography auto-prefixer typpy.js --save-dev
+
+# criar o arquivo tailwind
+npx tailwindcss init
+
+```
+
+Configuração e editação do tailwind.config.js
+```javascript
+const colors = require("tailwindcss/colors");
+
+module.exports = {
+  content: ["./resources/**/*.blade.php", "./vendor/filament/**/*.blade.php",
+  darkMode: "class",
+  theme: {
+    extend: {
+      colors: {
+        danger: colors.rose,
+        primary: colors.purple,
+        success: colors.green,
+        warning: colors.yellow,
+        secondary: colors.blue,
+      },
+    },
+  },
+  plugins: [
+    require("@tailwindcss/forms"),
+    require("@tailwindcss/typography"),
+  ],
+};
+```
+
+Criar o aquivo postcss.config.js na raiz do projeto e configurar
+
+```javascript
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {}
+  }
+}
+```
+
+Customizar o css alterando o arquivo resources/css/app.css o conteúdo está disponível na documentação fo filament no blog
+
+Sobreescrever o import default para
+```css
+@import "../../vendor/filament/filament/resources/css/app.css"
+```
+
+Em Provider na classe AppServiceProvider
+```php
+
+public function boot(): void
+{
+  Filament::serving(function(){
+    Filament::registerTheme(
+      app(Vite::class)('resources/css/app.css')
+    )
+  })
+}
+```
+
+Executar o build do NPM
+
+```shell
+npm run dev
+
+```
+
+Solução de problema se o build quebrar: Remover do package.json a linha:  "type":"module"
+
+IMPORTANTE: Toda alteração no css e javascript do Tailwind é necessário efetuar o build novamente.
+```
+```
+
+
+
+
+
 
 > Sábado, 09 de Março de 2024, Developer by Fabio Ribeiro
