@@ -535,6 +535,19 @@ IMPORTANTE: Toda alteração no css e javascript do Tailwind é necessário efet
 ```
 ```
 
+### Trabalhando com Grid layout
+Para alterar o layout baseado em Grid, a alteração é no Form
+
+```php
+# TaskResources.php
+# forms()
+Forms\Components\Grid::make()->schema([
+  Forms\Components\Select::make('user_id')->relationship('user', 'name')->searchable()->required()->columnSpan(2),
+  Forms\Components\Select::make('user_id')->relationship('user', 'name')->searchable()->required()->columnSpan(2),
+  Forms\Components\Select::make('user_id')->relationship('user', 'name')->searchable()->required()->columnSpan(4),
+  Forms\Components\Select::make('user_id')->relationship('user', 'name')->searchable()->required()->columnSpan(4),
+])->columns(4);
+```
 
 
 
