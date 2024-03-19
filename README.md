@@ -549,6 +549,209 @@ Forms\Components\Grid::make()->schema([
 ])->columns(4);
 ```
 
+# Trabalhando com Grid Layout
+
+Personalizar o Grid da tela. O padrão é 2 colunas.
+```php
+# em form(), exemplo com 4 colunas
+
+	$form->schema([
+
+		Forms\Components\Grid::make()->schema([
+
+			Forms\Components\Select::make('user_id')->relationship('user', 'name')->searchable()->required(),
+
+	
+			Forms\Components\Select::make('task_group_id')->relationship('taskGroup', 'title')->required(),
+
+			Forms\Components\Select::make('title')->required()->maxLength(255),
+
+			Forms\Components\Select::make('description')->maxLength(255),
+
+	])->columns(4),
+
+]);
+
+# exemplo mais personalizado usando ColumnSpan
+	$form->schema([
+
+		Forms\Components\Grid::make()->schema([
+
+			Forms\Components\Select::make('user_id')->relationship('user', 'name')->searchable()->required()->columnSpan(2),
+
+	
+			Forms\Components\Select::make('task_group_id')->relationship('taskGroup', 'title')->required()->columnSpan(2),
+
+			Forms\Components\Select::make('title')->required()->maxLength(255)->columnSpan(4),
+
+			Forms\Components\Select::make('description')->maxLength(255)->columnSpan(4),
+
+	])->columns(4),
+
+]);
+``` 
+
+# Trabalhando com Card Layout
+
+Envolvendo o form com Card
+
+```php
+# Alterar de Grid para Card
+
+$form->schema([
+
+		Forms\Components\Card::make()->schema([
+
+			Forms\Components\Select::make('user_id')->relationship('user', 'name')->searchable()->required()->columnSpan(2),
+
+	
+			Forms\Components\Select::make('task_group_id')->relationship('taskGroup', 'title')->required()->columnSpan(2),
+
+			Forms\Components\Select::make('title')->required()->maxLength(255)->columnSpan(4),
+
+			Forms\Components\Select::make('description')->maxLength(255)->columnSpan(4),
+
+	])->columns(4),
+
+]);
+
+```
+
+# Internacionalização
+
+Traduzir o _core_ do _Filament_ para Português do Brasil
+
+```php
+# Publicar as traduções
+
+php artisan vendor:publish --target=filament-translation
+```
+
+Foi criado na raiz do projeto o diretório _Lang_, com o _vendor_ e todos os idiomas suportados.
+
+#### Configuração
+
+Editar a classe _config/app.php_
+
+```php
+# localize o timezone e altere para
+'timezone' => 'America/Sao_Paulo'
+
+# localize o locale
+'locale' => 'pt_BR'
+```
+
+#### Remover o rodapé (_footer_) padrão do _Filament_
+
+Editar a classe _config/Filament.php_
+
+```php
+# localize footer altere a opção should_show_logo
+'should_show_logo' => false,
+
+```
+
+#### Permitir esconder o Menu de navegação
+
+Editar a classe _config/Filament.php_
+
+```php
+# localize sidebar altere a opção is_collapsible_on_desktop
+'is_collapsible_on_desktop' => true,
+```
+
+#### Ordenar o menu de navegação
+
+Para ordernar a ordem de exibição do Menu, utilizamos a propriedade _$navigatationSort_ em cada recurso
+```php
+# em TaskGrouprResource.php
+protected static ?int $navigationSort = 1;
+
+# em TaskResource.php
+protected static ?int $navigationSort = 2;
+
+# em UserResource.php
+protected static ?int $navigationSort = 3;
+
+```
+
+#### Alterando os ícones do menu de navegação
+
+O _Filament_ tem a propriedade _$navigationIcon_. Os icones da versão 2 do _Filament_ podem ser encontrados em: _heroicons.com_
+
+```php
+# alterar a propriedade $navigationIcon
+protected static ?string $navigationIcon = 'heroicon-o-archive';
+```
+
+#### Adicionando badges quantitativos no menu de navegação
+
+O _Filament_ tem uma função _getNavigationBadge_ para esse recurso. 
+
+```php
+# adicionar
+protected static function getNavigationBadge(): ?string
+{
+	$taskGroupDoneId = TaskGroup::query()->whereTitle('Done')->?first()->?id;
+
+	return (string) static::getModel()::where('task_group_id', '<>', $taskGroupDoneId)->count();
+}
+```
+
+#### Agrupando itenso do menu de navegação
+
+O _Filament_ tem a propriedade _$navigationGroup_.
+
+```php
+# 
+protected static ?string $navigationGroup = 'Tarefas';
+
+```
+
+#### Alterando o _Label_ 
+
+Utilizar o singular para os _labels_ 
+
+```php
+protected static ?string $label = 'Missão';
+
+# IMPORTANTE: Caso o plural não funcione utilize a propriedade $pluralLabel
+
+protected static ?string $pluralLabel = 'Missões';
+
+# Caso a alteração do label seja apenas para o Menu, existe a propriedade $navigationLabel
+// protected static ?string $navigationLabel = 'Banana';
+
+```
+
+#### Alterando o _Dashboard_
+
+Remover os cards padrões do _Filaments_, os cards são _Widgets_
+
+```php
+# em config/filament.php
+
+
+# criar o widget
+php artisan make:filament-widget StatsOverview --stats-overview
+```
+
+editar a classe diretorio App/Filament/Widgets/StatsOverview.php
+
+```php
+protected function getCards(): array
+{
+	$taskIds = TaskGroup::query()->whereTitle()?->get()->id;
+	return [
+		Card::make('Concluído', Task::query()->where('task_group_id', $taskIds[0])->count(),
+		Card::make('Em andamento', Task::query()->where('task_group_id', $taskIds[1])->count(),
+		Card::make('Pendente', Task::query()->where('task_group_id', $taskIds[2])->count(),
+	];
+}
+```
+
+
+
 
 
 
